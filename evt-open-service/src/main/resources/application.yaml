@@ -1,0 +1,12 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: evt-open-service
+
+grpc:
+  client:
+    evt-core-service:
+      address: 'static://${EVT_CORE_SERVICE_HOST:localhost}:${EVT_CORE_SERVICE_GRPC_PORT:9090}'
+      negotiation-type: plaintext

@@ -157,14 +157,19 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
     public void getEventStats(GetStatsRequest protoRequest,
                               StreamObserver<com.evently.grpc.StatsResponse> responseObserver) {
         try {
-            com.evently.evt_core_service.dto.response.StatsResponse stats =
-                    (com.evently.evt_core_service.dto.response.StatsResponse) eventService.getStats();
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> statsMap = (java.util.Map<String, Object>) eventService.getStats();
+            long totalEvents = (long) statsMap.get("totalEvents");
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Long> byStatus = (java.util.Map<String, Long>) statsMap.get("byStatus");
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Long> byCategory = (java.util.Map<String, Long>) statsMap.get("byCategory");
 
             com.evently.grpc.StatsResponse protoStats =
                     com.evently.grpc.StatsResponse.newBuilder()
-                            .setTotalEvents(stats.getTotalEvents())
-                            .putAllByStatus(stats.getByStatus())
-                            .putAllByCategory(stats.getByCategory())
+                            .setTotalEvents(totalEvents)
+                            .putAllByStatus(byStatus)
+                            .putAllByCategory(byCategory)
                             .build();
 
             responseObserver.onNext(protoStats);

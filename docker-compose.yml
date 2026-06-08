@@ -57,3 +57,41 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  evt-core-service:
+    build:
+      context: .
+      dockerfile: evt-core-service/Dockerfile
+    container_name: evently-core
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/evently_db
+      SPRING_DATASOURCE_USERNAME: evently
+      SPRING_DATASOURCE_PASSWORD: evently
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  evt-open-service:
+    build:
+      context: .
+      dockerfile: evt-open-service/Dockerfile
+    container_name: evently-open
+    environment:
+      EVT_CORE_SERVICE_HOST: evt-core-service
+      EVT_CORE_SERVICE_GRPC_PORT: 9090
+    ports:
+      - "8082:8082"
+    depends_on:
+      - evt-core-service
+
+  evt-bff:
+    build: ./evt-bff
+    container_name: evently-bff
+    environment:
+      EVT_OPEN_SERVICE_URL: http://evt-open-service:8082
+    ports:
+      - "8080:8080"
+    depends_on:
+      - evt-open-service

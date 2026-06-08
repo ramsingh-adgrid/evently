@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: evt-bff
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    openfeign:
+      okhttp:
+        enabled: true
+
+evt-open-service:
+  url: ${EVT_OPEN_SERVICE_URL:http://localhost:8082}

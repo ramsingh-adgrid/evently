@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package evently;
+
+option java_package = "com.evently.grpc";
+option java_multiple_files = true;
+option java_outer_classname = "EventProto";
+
+enum CategoryProto {
+  CATEGORY_UNSPECIFIED = 0;
+  MUSIC = 1;
+  SPORTS = 2;
+  COMEDY = 3;
+  WORKSHOP = 4;
+  OTHER = 5;
+}
+
+enum EventStatusProto {
+  STATUS_UNSPECIFIED = 0;
+  DRAFT = 1;
+  PUBLISHED = 2;
+  CANCELLED = 3;
+  SOLD_OUT = 4;
+}
+
+message CreateEventRequest {
+  string event_name = 1;
+  string organizer_name = 2;
+  string organizer_mobile = 3;
+  string city = 4;
+  CategoryProto category = 5;
+}
+
+message GetEventRequest {
+  string id = 1;
+}
+
+message UpdateEventStatusRequest {
+  string id = 1;
+  EventStatusProto status = 2;
+}
+
+message ListEventsRequest {
+  string city = 1;
+  CategoryProto category = 2;
+  EventStatusProto status = 3;
+  int32 page = 4;
+  int32 size = 5;
+}
+
+message EventResponse {
+  string id = 1;
+  string event_name = 2;
+  string organizer_name = 3;
+  string organizer_mobile = 4;
+  string city = 5;
+  CategoryProto category = 6;
+  EventStatusProto status = 7;
+  string created_on = 8;
+  string modified_on = 9;
+}
+
+message ListEventsResponse {
+  repeated EventResponse events = 1;
+  int64 total_elements = 2;
+  int32 total_pages = 3;
+  int32 current_page = 4;
+}
+
+message StatsResponse {
+  int64 total_events = 1;
+  map<string, int64> by_status = 2;
+  map<string, int64> by_category = 3;
+}
+
+message GetStatsRequest {}
+
+service EventService {
+  rpc CreateEvent(CreateEventRequest) returns (EventResponse);
+  rpc GetEvent(GetEventRequest) returns (EventResponse);
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+  rpc UpdateEventStatus(UpdateEventStatusRequest) returns (EventResponse);
+  rpc GetEventStats(GetStatsRequest) returns (StatsResponse);
+}
