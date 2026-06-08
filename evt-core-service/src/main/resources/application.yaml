@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: evt-core-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/evently_db}
+    username: ${SPRING_DATASOURCE_USERNAME:evently}
+    password: ${SPRING_DATASOURCE_PASSWORD:evently}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8081
+
+  grpc:
+    server:
+      port: 9090
