@@ -1,5 +1,6 @@
 /Users/rampratapsingh/evently/evt-notification-service/src/main/java/com/evently/evt_notification_service/EvtNotificationServiceApplication.java
 /Users/rampratapsingh/evently/evt-notification-service/src/main/java/com/evently/evt_notification_service/config/KafkaConsumerConfig.java
+/Users/rampratapsingh/evently/evt-notification-service/src/main/java/com/evently/evt_notification_service/config/MongoConfig.java
 /Users/rampratapsingh/evently/evt-notification-service/src/main/java/com/evently/evt_notification_service/consumer/EventKafkaListener.java
 /Users/rampratapsingh/evently/evt-notification-service/src/main/java/com/evently/evt_notification_service/controller/DashboardController.java
 /Users/rampratapsingh/evently/evt-notification-service/src/main/java/com/evently/evt_notification_service/document/CityDashboard.java

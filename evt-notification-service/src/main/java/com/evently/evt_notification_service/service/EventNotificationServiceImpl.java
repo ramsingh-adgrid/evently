@@ -65,6 +65,12 @@ public class EventNotificationServiceImpl implements EventNotificationService {
             log.info("Successfully processed event notification. Event ID: {}, Entity ID: {}", eventId, payload.getId());
         } catch (Exception e) {
             log.error("Error processing event notification. Event ID: {}", eventId, e);
+            // Programmatically delete the notification in case transactions are not active (e.g. standalone Mongo)
+            try {
+                eventNotificationRepository.deleteByEventId(eventId);
+            } catch (Exception cleanUpEx) {
+                log.error("Failed to clean up orphaned notification for eventId={} during fallback", eventId, cleanUpEx);
+            }
             throw e; // rethrow to trigger retry/DLT
         }
     }

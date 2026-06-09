@@ -244,4 +244,20 @@ class EventNotificationServiceImplTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventNotificationService.getDashboardByCity(city))
                 .isInstanceOf(com.evently.evt_notification_service.exception.ResourceNotFoundException.class);
     }
+
+    @Test
+    void processEventNotification_shouldCleanUpAndRethrowOnFailure() {
+        // Arrange
+        String eventId = "msg-999";
+        when(eventNotificationRepository.findByEntityId(any()))
+                .thenThrow(new RuntimeException("Simulated DB failure during updateDashboard"));
+
+        // Act & Assert
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventNotificationService.processEventNotification(wrapper))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Simulated DB failure during updateDashboard");
+
+        verify(eventNotificationRepository, times(1)).save(any(EventNotification.class));
+        verify(eventNotificationRepository, times(1)).deleteByEventId(eventId);
+    }
 }

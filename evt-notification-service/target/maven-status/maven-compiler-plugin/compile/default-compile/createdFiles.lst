@@ -6,6 +6,7 @@ com/evently/evt_notification_service/dto/response/CityDashboardResponse$CityDash
 com/evently/evt_notification_service/dto/response/EventNotificationResponse$EventNotificationResponseBuilder.class
 com/evently/evt_notification_service/document/CityDashboard$CityDashboardBuilder.class
 com/evently/evt_notification_service/exception/ResourceNotFoundException.class
+com/evently/evt_notification_service/config/MongoConfig.class
 com/evently/evt_notification_service/document/EventNotification.class
 com/evently/evt_notification_service/repository/EventNotificationRepository.class
 com/evently/evt_notification_service/controller/DashboardController.class

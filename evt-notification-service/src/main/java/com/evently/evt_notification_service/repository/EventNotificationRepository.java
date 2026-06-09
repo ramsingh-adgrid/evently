@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface EventNotificationRepository extends MongoRepository<EventNotification, String> {
     boolean existsByEventId(String eventId);
+    void deleteByEventId(String eventId);
     List<EventNotification> findByEntityId(String entityId);
     Page<EventNotification> findByEntityId(String entityId, Pageable pageable);
     Optional<EventNotification> findFirstByEntityIdOrderByReceivedAtDesc(String entityId);
