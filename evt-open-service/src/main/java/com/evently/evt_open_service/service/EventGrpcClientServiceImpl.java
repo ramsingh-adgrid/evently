@@ -11,9 +11,11 @@ import com.evently.evt_open_service.exception.BadRequestException;
 import com.evently.evt_open_service.exception.DuplicateResourceException;
 import com.evently.evt_open_service.exception.ResourceNotFoundException;
 import com.evently.evt_open_service.mapper.EventEnumMapper;
+import com.evently.evt_open_service.publisher.EventPublisher;
 import com.evently.grpc.EventServiceGrpc;
 import com.evently.grpc.GetStatsRequest;
 import io.grpc.StatusRuntimeException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,10 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class EventGrpcClientServiceImpl implements EventGrpcClientService {
+
+    private final EventPublisher eventPublisher;
 
     @GrpcClient("evt-core-service")
     private EventServiceGrpc.EventServiceBlockingStub eventServiceStub;
@@ -41,7 +46,9 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
 
         try {
             com.evently.grpc.EventResponse protoResponse = eventServiceStub.createEvent(protoRequest);
-            return mapToDto(protoResponse);
+            EventResponse response = mapToDto(protoResponse);
+            eventPublisher.publishEvent(response.getId().toString(), "EVENT_CREATED", response);
+            return response;
         } catch (StatusRuntimeException e) {
             throw translateException(e);
         }
@@ -99,7 +106,9 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
 
         try {
             com.evently.grpc.EventResponse protoResponse = eventServiceStub.updateEventStatus(protoRequest);
-            return mapToDto(protoResponse);
+            EventResponse response = mapToDto(protoResponse);
+            eventPublisher.publishEvent(response.getId().toString(), "EVENT_STATUS_CHANGED", response);
+            return response;
         } catch (StatusRuntimeException e) {
             throw translateException(e);
         }

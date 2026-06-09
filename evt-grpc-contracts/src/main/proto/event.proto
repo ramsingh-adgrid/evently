@@ -6,6 +6,17 @@ option java_package = "com.evently.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "EventProto";
 
+
+
+service EventService {
+  rpc CreateEvent(CreateEventRequest) returns (EventResponse);
+  rpc GetEvent(GetEventRequest) returns (EventResponse);
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+  rpc UpdateEventStatus(UpdateEventStatusRequest) returns (EventResponse);
+  rpc GetEventStats(GetStatsRequest) returns (StatsResponse);
+}
+
+
 enum CategoryProto {
   CATEGORY_UNSPECIFIED = 0;
   MUSIC = 1;
@@ -75,10 +86,3 @@ message StatsResponse {
 
 message GetStatsRequest {}
 
-service EventService {
-  rpc CreateEvent(CreateEventRequest) returns (EventResponse);
-  rpc GetEvent(GetEventRequest) returns (EventResponse);
-  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
-  rpc UpdateEventStatus(UpdateEventStatusRequest) returns (EventResponse);
-  rpc GetEventStats(GetStatsRequest) returns (StatsResponse);
-}

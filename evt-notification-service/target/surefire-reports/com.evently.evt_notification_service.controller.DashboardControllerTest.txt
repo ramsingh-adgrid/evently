@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.evently.evt_notification_service.controller.DashboardControllerTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.492 s -- in com.evently.evt_notification_service.controller.DashboardControllerTest

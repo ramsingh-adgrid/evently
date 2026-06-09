@@ -1,6 +1,6 @@
 package com.evently.evt_bff.controller;
 
-import com.evently.evt_bff.client.EventOpenServiceClient;
+import com.evently.evt_bff.client.EventFeignClient;
 import com.evently.evt_bff.dto.request.CreateEventRequest;
 import com.evently.evt_bff.dto.request.UpdateStatusRequest;
 import com.evently.evt_bff.dto.response.ApiResponse;
@@ -21,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EventBffController {
 
-    private final EventOpenServiceClient eventOpenServiceClient;
+    private final EventFeignClient eventOpenServiceClient;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

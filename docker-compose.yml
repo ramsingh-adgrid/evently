@@ -81,10 +81,30 @@ services:
     environment:
       EVT_CORE_SERVICE_HOST: evt-core-service
       EVT_CORE_SERVICE_GRPC_PORT: 9090
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8082:8082"
     depends_on:
-      - evt-core-service
+      evt-core-service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+
+  evt-notification-service:
+    build:
+      context: .
+      dockerfile: evt-notification-service/Dockerfile
+    container_name: evently-notification
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/evently_notifications
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8083:8083"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   evt-bff:
     build: ./evt-bff
