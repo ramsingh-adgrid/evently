@@ -1,6 +1,9 @@
 package com.evently.evt_core_service.exception;
 
-import com.evently.evt_core_service.dto.response.ApiResponse;
+import com.common.evt_commom_util.dto.response.ApiResponse;
+import com.common.evt_commom_util.exception.BadRequestException;
+import com.common.evt_commom_util.exception.DuplicateResourceException;
+import com.common.evt_commom_util.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,6 +46,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<Void> handleGeneral(Exception ex) {
-        return ApiResponse.failure("Internal server error: " + ex.getMessage());
+        return ApiResponse.failure("An internal server error occurred");
     }
 }

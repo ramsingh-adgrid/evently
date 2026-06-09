@@ -1,6 +1,9 @@
 package com.evently.evt_bff.exception;
 
-import com.evently.evt_bff.dto.response.ApiResponse;
+import com.common.evt_commom_util.dto.response.ApiResponse;
+import com.common.evt_commom_util.exception.BadRequestException;
+import com.common.evt_commom_util.exception.DuplicateResourceException;
+import com.common.evt_commom_util.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;

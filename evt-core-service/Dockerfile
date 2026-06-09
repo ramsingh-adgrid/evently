@@ -3,6 +3,9 @@ WORKDIR /app
 COPY evt-grpc-contracts ./evt-grpc-contracts
 RUN mvn -f evt-grpc-contracts/pom.xml clean install -DskipTests
 
+COPY evt-commom-util ./evt-commom-util
+RUN mvn -f evt-commom-util/pom.xml clean install -DskipTests
+
 COPY evt-core-service ./evt-core-service
 RUN mvn -f evt-core-service/pom.xml package -DskipTests
 

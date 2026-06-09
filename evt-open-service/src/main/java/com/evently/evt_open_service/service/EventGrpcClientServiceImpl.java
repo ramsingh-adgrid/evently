@@ -1,16 +1,18 @@
 package com.evently.evt_open_service.service;
 
-import com.evently.evt_open_service.dto.request.CreateEventRequest;
-import com.evently.evt_open_service.dto.request.UpdateStatusRequest;
-import com.evently.evt_open_service.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.request.CreateEventRequest;
+import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
+import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.response.StatsResponse;
+import com.common.evt_commom_util.enums.Category;
+import com.common.evt_commom_util.enums.Status;
+import com.common.evt_commom_util.exception.BadRequestException;
+import com.common.evt_commom_util.exception.DuplicateResourceException;
+import com.common.evt_commom_util.exception.ResourceNotFoundException;
+import com.common.evt_commom_util.mapper.EventEnumMapper;
+import com.common.evt_commom_util.constants.CommonConstants;
 import com.evently.evt_open_service.dto.response.ListEventsResponse;
-import com.evently.evt_open_service.dto.response.StatsResponse;
-import com.evently.evt_open_service.enums.Category;
-import com.evently.evt_open_service.enums.Status;
-import com.evently.evt_open_service.exception.BadRequestException;
-import com.evently.evt_open_service.exception.DuplicateResourceException;
-import com.evently.evt_open_service.exception.ResourceNotFoundException;
-import com.evently.evt_open_service.mapper.EventEnumMapper;
+import com.evently.evt_open_service.mapper.EventGrpcClientMapper;
 import com.evently.evt_open_service.publisher.EventPublisher;
 import com.evently.grpc.EventServiceGrpc;
 import com.evently.grpc.GetStatsRequest;
@@ -20,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,18 +37,12 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
 
     @Override
     public EventResponse createEvent(CreateEventRequest request) {
-        com.evently.grpc.CreateEventRequest protoRequest = com.evently.grpc.CreateEventRequest.newBuilder()
-                .setEventName(request.getEventName())
-                .setOrganizerName(request.getOrganizerName())
-                .setOrganizerMobile(request.getOrganizerMobile())
-                .setCity(request.getCity())
-                .setCategory(EventEnumMapper.toProto(request.getCategory()))
-                .build();
+        com.evently.grpc.CreateEventRequest protoRequest = EventGrpcClientMapper.toProto(request);
 
         try {
             com.evently.grpc.EventResponse protoResponse = eventServiceStub.createEvent(protoRequest);
-            EventResponse response = mapToDto(protoResponse);
-            eventPublisher.publishEvent(response.getId().toString(), "EVENT_CREATED", response);
+            EventResponse response = EventGrpcClientMapper.toDto(protoResponse);
+            eventPublisher.publishEvent(response.getId().toString(), CommonConstants.EVENT_TYPE_CREATED, response);
             return response;
         } catch (StatusRuntimeException e) {
             throw translateException(e);
@@ -62,7 +57,7 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
 
         try {
             com.evently.grpc.EventResponse protoResponse = eventServiceStub.getEvent(protoRequest);
-            return mapToDto(protoResponse);
+            return EventGrpcClientMapper.toDto(protoResponse);
         } catch (StatusRuntimeException e) {
             throw translateException(e);
         }
@@ -87,7 +82,7 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
         try {
             com.evently.grpc.ListEventsResponse protoResponse = eventServiceStub.listEvents(builder.build());
             return ListEventsResponse.builder()
-                    .events(protoResponse.getEventsList().stream().map(this::mapToDto).collect(Collectors.toList()))
+                    .events(protoResponse.getEventsList().stream().map(EventGrpcClientMapper::toDto).collect(Collectors.toList()))
                     .totalElements(protoResponse.getTotalElements())
                     .totalPages(protoResponse.getTotalPages())
                     .currentPage(protoResponse.getCurrentPage())
@@ -99,15 +94,12 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
 
     @Override
     public EventResponse updateStatus(UUID id, UpdateStatusRequest request) {
-        com.evently.grpc.UpdateEventStatusRequest protoRequest = com.evently.grpc.UpdateEventStatusRequest.newBuilder()
-                .setId(id.toString())
-                .setStatus(EventEnumMapper.toProto(request.getStatus()))
-                .build();
+        com.evently.grpc.UpdateEventStatusRequest protoRequest = EventGrpcClientMapper.toProto(id, request);
 
         try {
             com.evently.grpc.EventResponse protoResponse = eventServiceStub.updateEventStatus(protoRequest);
-            EventResponse response = mapToDto(protoResponse);
-            eventPublisher.publishEvent(response.getId().toString(), "EVENT_STATUS_CHANGED", response);
+            EventResponse response = EventGrpcClientMapper.toDto(protoResponse);
+            eventPublisher.publishEvent(response.getId().toString(), CommonConstants.EVENT_TYPE_STATUS_CHANGED, response);
             return response;
         } catch (StatusRuntimeException e) {
             throw translateException(e);
@@ -120,28 +112,10 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
 
         try {
             com.evently.grpc.StatsResponse protoResponse = eventServiceStub.getEventStats(protoRequest);
-            return StatsResponse.builder()
-                    .totalEvents(protoResponse.getTotalEvents())
-                    .byStatus(protoResponse.getByStatusMap())
-                    .byCategory(protoResponse.getByCategoryMap())
-                    .build();
+            return EventGrpcClientMapper.toDto(protoResponse);
         } catch (StatusRuntimeException e) {
             throw translateException(e);
         }
-    }
-
-    private EventResponse mapToDto(com.evently.grpc.EventResponse proto) {
-        return EventResponse.builder()
-                .id(UUID.fromString(proto.getId()))
-                .eventName(proto.getEventName())
-                .organizerName(proto.getOrganizerName())
-                .organizerMobile(proto.getOrganizerMobile())
-                .city(proto.getCity())
-                .category(EventEnumMapper.toCategory(proto.getCategory()))
-                .status(EventEnumMapper.toStatus(proto.getStatus()))
-                .createdOn(LocalDateTime.parse(proto.getCreatedOn()))
-                .modifiedOn(LocalDateTime.parse(proto.getModifiedOn()))
-                .build();
     }
 
     private RuntimeException translateException(StatusRuntimeException e) {

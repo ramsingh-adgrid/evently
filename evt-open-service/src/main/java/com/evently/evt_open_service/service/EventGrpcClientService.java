@@ -1,12 +1,12 @@
 package com.evently.evt_open_service.service;
 
-import com.evently.evt_open_service.dto.request.CreateEventRequest;
-import com.evently.evt_open_service.dto.request.UpdateStatusRequest;
-import com.evently.evt_open_service.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.request.CreateEventRequest;
+import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
+import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.response.StatsResponse;
+import com.common.evt_commom_util.enums.Category;
+import com.common.evt_commom_util.enums.Status;
 import com.evently.evt_open_service.dto.response.ListEventsResponse;
-import com.evently.evt_open_service.dto.response.StatsResponse;
-import com.evently.evt_open_service.enums.Category;
-import com.evently.evt_open_service.enums.Status;
 
 import java.util.UUID;
 

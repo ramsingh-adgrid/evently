@@ -107,7 +107,9 @@ services:
         condition: service_healthy
 
   evt-bff:
-    build: ./evt-bff
+    build:
+      context: .
+      dockerfile: evt-bff/Dockerfile
     container_name: evently-bff
     environment:
       EVT_OPEN_SERVICE_URL: http://evt-open-service:8082

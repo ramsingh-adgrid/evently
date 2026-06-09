@@ -1,5 +1,11 @@
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY evt-grpc-contracts ./evt-grpc-contracts
+RUN mvn -f evt-grpc-contracts/pom.xml clean install -DskipTests
+
+COPY evt-commom-util ./evt-commom-util
+RUN mvn -f evt-commom-util/pom.xml clean install -DskipTests
+
 COPY evt-notification-service ./evt-notification-service
 RUN mvn -f evt-notification-service/pom.xml package -DskipTests
 

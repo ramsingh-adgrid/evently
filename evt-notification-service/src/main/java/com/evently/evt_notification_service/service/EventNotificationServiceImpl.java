@@ -2,12 +2,13 @@ package com.evently.evt_notification_service.service;
 
 import com.evently.evt_notification_service.document.CityDashboard;
 import com.evently.evt_notification_service.document.EventNotification;
-import com.evently.evt_notification_service.dto.EventPayload;
-import com.evently.evt_notification_service.dto.KafkaEventWrapper;
+import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.kafka.KafkaEventWrapper;
 import com.evently.evt_notification_service.repository.CityDashboardRepository;
 import com.evently.evt_notification_service.repository.EventNotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +29,7 @@ public class EventNotificationServiceImpl implements EventNotificationService {
     @Transactional
     public void processEventNotification(KafkaEventWrapper wrapper) {
         String eventId = wrapper.getEventId();
-        if (eventNotificationRepository.existsByEventId(eventId)) {
-            log.warn("Duplicate message received. Event ID {} already exists in database. Skipping processing.", eventId);
-            return;
-        }
-
-        EventPayload payload = wrapper.getPayload();
+        EventResponse payload = wrapper.getPayload();
         if (payload == null) {
             log.error("Received message with null payload. Event ID: {}", eventId);
             throw new IllegalArgumentException("Payload cannot be null");
@@ -42,17 +38,22 @@ public class EventNotificationServiceImpl implements EventNotificationService {
 
         EventNotification notification = EventNotification.builder()
                 .eventId(eventId)
-                .entityId(payload.getId())
+                .entityId(payload.getId() != null ? payload.getId().toString() : null)
                 .eventName(payload.getEventName())
                 .eventType(wrapper.getEventType())
                 .city(payload.getCity())
-                .category(payload.getCategory())
-                .status(payload.getStatus())
+                .category(payload.getCategory() != null ? payload.getCategory().name() : null)
+                .status(payload.getStatus() != null ? payload.getStatus().name() : null)
                 .receivedAt(LocalDateTime.now())
                 .processed(false)
                 .build();
 
-        eventNotificationRepository.save(notification);
+        try {
+            eventNotificationRepository.save(notification);
+        } catch (DuplicateKeyException e) {
+            log.warn("Duplicate message received. Event ID {} already exists in database. Skipping processing.", eventId);
+            return;
+        }
 
         try {
 
@@ -71,19 +72,19 @@ public class EventNotificationServiceImpl implements EventNotificationService {
 
 
 
-    private void updateDashboard(EventPayload payload) {
+    private void updateDashboard(EventResponse payload) {
         String city = payload.getCity();
         if (city == null || city.isBlank()) {
             log.warn("City is empty for event entity ID: {}. Skipping dashboard update.", payload.getId());
             return;
         }
 
-        String category = payload.getCategory();
-        String status = payload.getStatus();
+        String category = payload.getCategory() != null ? payload.getCategory().name() : null;
+        String status = payload.getStatus() != null ? payload.getStatus().name() : null;
 
 
         Optional<EventNotification> previousNotificationOpt = eventNotificationRepository
-                .findByEntityId(payload.getId()).stream()
+                .findByEntityId(payload.getId() != null ? payload.getId().toString() : null).stream()
                 .filter(EventNotification::isProcessed)
                 .max((n1, n2) -> n1.getReceivedAt().compareTo(n2.getReceivedAt()));
 
@@ -214,8 +215,10 @@ public class EventNotificationServiceImpl implements EventNotificationService {
 
 
     @Override
-    public List<EventNotification> getNotificationsByEntityId(String entityId) {
-        return eventNotificationRepository.findByEntityId(entityId);
+    public List<EventNotification> getNotificationsByEntityId(String entityId, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "receivedAt"));
+        return eventNotificationRepository.findByEntityId(entityId, pageable).getContent();
     }
 
 

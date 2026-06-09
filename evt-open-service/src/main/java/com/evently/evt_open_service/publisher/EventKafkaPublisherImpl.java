@@ -1,7 +1,8 @@
 package com.evently.evt_open_service.publisher;
 
-import com.evently.evt_open_service.dto.kafka.KafkaEventWrapper;
-import com.evently.evt_open_service.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.kafka.KafkaEventWrapper;
+import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.constants.CommonConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -15,49 +16,40 @@ import java.util.UUID;
 @Slf4j
 public class EventKafkaPublisherImpl implements EventPublisher {
 
-    public static final String TOPIC_EVENT_PUBLISHED = "event.published";
-    public static final String TOPIC_EVENT_STATUS_CHANGED = "event.status.changed";
+    public static final String TOPIC_EVENT_PUBLISHED = CommonConstants.TOPIC_EVENT_PUBLISHED;
+    public static final String TOPIC_EVENT_STATUS_CHANGED = CommonConstants.TOPIC_EVENT_STATUS_CHANGED;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public void publishEvent(String entityId, String eventType, Object payload) {
         String messageId = UUID.randomUUID().toString();
-        
+
+        EventResponse eventResponsePayload = null;
+        if (payload instanceof EventResponse eventResponse) {
+            eventResponsePayload = eventResponse;
+        }
+
         KafkaEventWrapper wrapper = KafkaEventWrapper.builder()
                 .eventId(messageId)
                 .eventType(eventType)
                 .occurredAt(LocalDateTime.now().toString())
-                .payload(payload)
+                .payload(eventResponsePayload)
                 .build();
 
         String topic = determineTopic(eventType, payload);
 
-        log.info("Publishing Kafka event: messageId={}, entityId={}, eventType={}, topic={}", 
+        log.info("Publishing Kafka event: messageId={}, entityId={}, eventType={}, topic={}",
                 messageId, entityId, eventType, topic);
 
-
+        // Key the message by the entity ID to preserve per-entity ordering
         kafkaTemplate.send(topic, entityId, wrapper);
     }
 
     private String determineTopic(String eventType, Object payload) {
-        if ("EVENT_CREATED".equals(eventType)) {
+        if (CommonConstants.EVENT_TYPE_CREATED.equals(eventType)) {
             return TOPIC_EVENT_PUBLISHED;
         }
-        
-        if (payload instanceof EventResponse eventResponse) {
-            if (eventResponse.getStatus() != null) {
-                switch (eventResponse.getStatus()) {
-                    case PUBLISHED:
-                        return TOPIC_EVENT_PUBLISHED;
-                    case CANCELLED:
-                    case SOLD_OUT:
-                    case DRAFT:
-                        return TOPIC_EVENT_STATUS_CHANGED;
-                }
-            }
-        }
-        
         return TOPIC_EVENT_STATUS_CHANGED;
     }
 }

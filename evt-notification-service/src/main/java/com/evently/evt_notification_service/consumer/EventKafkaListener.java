@@ -1,6 +1,7 @@
 package com.evently.evt_notification_service.consumer;
 
-import com.evently.evt_notification_service.dto.KafkaEventWrapper;
+import com.common.evt_commom_util.dto.kafka.KafkaEventWrapper;
+import com.common.evt_commom_util.constants.CommonConstants;
 import com.evently.evt_notification_service.service.EventNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ public class EventKafkaListener {
     private final EventNotificationService eventNotificationService;
 
     @KafkaListener(
-            topics = {"event.published", "event.status.changed"},
+            topics = {CommonConstants.TOPIC_EVENT_PUBLISHED, CommonConstants.TOPIC_EVENT_STATUS_CHANGED},
             groupId = "${spring.kafka.consumer.group-id:evently-notification-group}",
             containerFactory = "kafkaListenerContainerFactory"
     )
@@ -25,7 +26,7 @@ public class EventKafkaListener {
         log.info("Received event wrapper: eventId={}, eventType={}", wrapper.getEventId(), wrapper.getEventType());
 
         try {
-            if (wrapper.getPayload() != null && "POISON_PILL".equalsIgnoreCase(wrapper.getPayload().getEventName())) {
+            if (wrapper.getPayload() != null && CommonConstants.EVENT_NAME_POISON_PILL.equalsIgnoreCase(wrapper.getPayload().getEventName())) {
                 log.error("Poison pill message detected. Simulating processing failure to trigger DLT.");
                 throw new RuntimeException("Simulated processing failure (Poison Pill)");
             }

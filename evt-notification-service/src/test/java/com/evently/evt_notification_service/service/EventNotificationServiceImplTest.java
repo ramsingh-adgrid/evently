@@ -1,9 +1,9 @@
 package com.evently.evt_notification_service.service;
 
+import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.kafka.KafkaEventWrapper;
 import com.evently.evt_notification_service.document.CityDashboard;
 import com.evently.evt_notification_service.document.EventNotification;
-import com.evently.evt_notification_service.dto.EventPayload;
-import com.evently.evt_notification_service.dto.KafkaEventWrapper;
 import com.evently.evt_notification_service.repository.CityDashboardRepository;
 import com.evently.evt_notification_service.repository.EventNotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,16 +37,16 @@ class EventNotificationServiceImplTest {
     private EventNotificationServiceImpl eventNotificationService;
 
     private KafkaEventWrapper wrapper;
-    private EventPayload payload;
+    private EventResponse payload;
 
     @BeforeEach
     void setUp() {
-        payload = EventPayload.builder()
-                .id("event-123")
+        payload = EventResponse.builder()
+                .id(UUID.fromString("00000000-0000-0000-0000-000000000123"))
                 .eventName("Salsa Night")
                 .city("Chicago")
-                .category("MUSIC")
-                .status("DRAFT")
+                .category(com.common.evt_commom_util.enums.Category.MUSIC)
+                .status(com.common.evt_commom_util.enums.Status.DRAFT)
                 .build();
 
         wrapper = KafkaEventWrapper.builder()
@@ -58,21 +59,21 @@ class EventNotificationServiceImplTest {
     @Test
     void processEventNotification_shouldSkipIfDuplicateEventId() {
         // Arrange
-        when(eventNotificationRepository.existsByEventId("msg-999")).thenReturn(true);
+        when(eventNotificationRepository.save(any(EventNotification.class)))
+                .thenThrow(new org.springframework.dao.DuplicateKeyException("Duplicate eventId"));
 
         // Act
         eventNotificationService.processEventNotification(wrapper);
 
         // Assert
-        verify(eventNotificationRepository, never()).save(any());
+        verify(eventNotificationRepository, times(1)).save(any(EventNotification.class));
         verify(cityDashboardRepository, never()).save(any());
     }
 
     @Test
     void processEventNotification_shouldCreateNewDashboardIfFirstEvent() {
         // Arrange
-        when(eventNotificationRepository.existsByEventId("msg-999")).thenReturn(false);
-        when(eventNotificationRepository.findByEntityId("event-123")).thenReturn(new ArrayList<>());
+        when(eventNotificationRepository.findByEntityId("00000000-0000-0000-0000-000000000123")).thenReturn(new ArrayList<>());
         when(cityDashboardRepository.findById("Chicago")).thenReturn(Optional.empty());
 
         // Act
@@ -94,9 +95,8 @@ class EventNotificationServiceImplTest {
     @Test
     void processEventNotification_shouldIncrementPublishedEventsIfStatusIsPublished() {
         // Arrange
-        payload.setStatus("PUBLISHED");
-        when(eventNotificationRepository.existsByEventId("msg-999")).thenReturn(false);
-        when(eventNotificationRepository.findByEntityId("event-123")).thenReturn(new ArrayList<>());
+        payload.setStatus(com.common.evt_commom_util.enums.Status.PUBLISHED);
+        when(eventNotificationRepository.findByEntityId("00000000-0000-0000-0000-000000000123")).thenReturn(new ArrayList<>());
         when(cityDashboardRepository.findById("Chicago")).thenReturn(Optional.empty());
 
         // Act
@@ -116,14 +116,14 @@ class EventNotificationServiceImplTest {
         // Arrange
         EventNotification previousNotification = EventNotification.builder()
                 .eventId("msg-888")
-                .entityId("event-123")
+                .entityId("00000000-0000-0000-0000-000000000123")
                 .city("Chicago")
                 .category("MUSIC")
                 .status("DRAFT")
                 .processed(true)
                 .build();
 
-        payload.setStatus("PUBLISHED");
+        payload.setStatus(com.common.evt_commom_util.enums.Status.PUBLISHED);
 
         CityDashboard existingDashboard = CityDashboard.builder()
                 .city("Chicago")
@@ -132,8 +132,7 @@ class EventNotificationServiceImplTest {
                 .eventsByCategory(new HashMap<>() {{ put("MUSIC", 1L); }})
                 .build();
 
-        when(eventNotificationRepository.existsByEventId("msg-999")).thenReturn(false);
-        when(eventNotificationRepository.findByEntityId("event-123")).thenReturn(List.of(previousNotification));
+        when(eventNotificationRepository.findByEntityId("00000000-0000-0000-0000-000000000123")).thenReturn(List.of(previousNotification));
         when(cityDashboardRepository.findById("Chicago")).thenReturn(Optional.of(existingDashboard));
 
         // Act
@@ -154,7 +153,7 @@ class EventNotificationServiceImplTest {
         // Arrange
         EventNotification previousNotification = EventNotification.builder()
                 .eventId("msg-888")
-                .entityId("event-123")
+                .entityId("00000000-0000-0000-0000-000000000123")
                 .city("Chicago")
                 .category("MUSIC")
                 .status("PUBLISHED")
@@ -162,7 +161,7 @@ class EventNotificationServiceImplTest {
                 .build();
 
         payload.setCity("Detroit");
-        payload.setStatus("PUBLISHED");
+        payload.setStatus(com.common.evt_commom_util.enums.Status.PUBLISHED);
 
         CityDashboard chicagoDashboard = CityDashboard.builder()
                 .city("Chicago")
@@ -178,8 +177,7 @@ class EventNotificationServiceImplTest {
                 .eventsByCategory(new HashMap<>())
                 .build();
 
-        when(eventNotificationRepository.existsByEventId("msg-999")).thenReturn(false);
-        when(eventNotificationRepository.findByEntityId("event-123")).thenReturn(List.of(previousNotification));
+        when(eventNotificationRepository.findByEntityId("00000000-0000-0000-0000-000000000123")).thenReturn(List.of(previousNotification));
         when(cityDashboardRepository.findById("Chicago")).thenReturn(Optional.of(chicagoDashboard));
         when(cityDashboardRepository.findById("Detroit")).thenReturn(Optional.of(detroitDashboard));
 
@@ -201,5 +199,49 @@ class EventNotificationServiceImplTest {
         assertThat(savedDetroit.getTotalEvents()).isEqualTo(1);
         assertThat(savedDetroit.getPublishedEvents()).isEqualTo(1);
         assertThat(savedDetroit.getEventsByCategory().get("MUSIC")).isEqualTo(1);
+    }
+
+    @Test
+    void getNotificationsByEntityId_shouldReturnPaginatedNotifications() {
+        // Arrange
+        String entityId = "event-123";
+        EventNotification notification = EventNotification.builder().entityId(entityId).build();
+        org.springframework.data.domain.Page<EventNotification> pageResult = new org.springframework.data.domain.PageImpl<>(List.of(notification));
+        
+        when(eventNotificationRepository.findByEntityId(eq(entityId), any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(pageResult);
+
+        // Act
+        List<EventNotification> results = eventNotificationService.getNotificationsByEntityId(entityId, 0, 10);
+
+        // Assert
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getEntityId()).isEqualTo(entityId);
+    }
+
+    @Test
+    void getDashboardByCity_shouldReturnDashboard() {
+        // Arrange
+        String city = "Chicago";
+        CityDashboard dashboard = CityDashboard.builder().city(city).build();
+        when(cityDashboardRepository.findById(city)).thenReturn(Optional.of(dashboard));
+
+        // Act
+        CityDashboard result = eventNotificationService.getDashboardByCity(city);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getCity()).isEqualTo(city);
+    }
+
+    @Test
+    void getDashboardByCity_shouldThrowIfNotFound() {
+        // Arrange
+        String city = "Chicago";
+        when(cityDashboardRepository.findById(city)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventNotificationService.getDashboardByCity(city))
+                .isInstanceOf(com.evently.evt_notification_service.exception.ResourceNotFoundException.class);
     }
 }

@@ -1,10 +1,11 @@
 package com.evently.evt_core_service.service;
 
-import com.evently.evt_core_service.dto.request.CreateEventRequest;
-import com.evently.evt_core_service.dto.request.UpdateStatusRequest;
-import com.evently.evt_core_service.dto.response.EventResponse;
-import com.evently.evt_core_service.enums.Category;
-import com.evently.evt_core_service.enums.Status;
+import com.common.evt_commom_util.dto.request.CreateEventRequest;
+import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
+import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.response.StatsResponse;
+import com.common.evt_commom_util.enums.Category;
+import com.common.evt_commom_util.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,5 +16,5 @@ public interface EventService {
     EventResponse getEvent(UUID id);
     Page<EventResponse> listEvents(String city, Category category, Status status, Pageable pageable);
     EventResponse updateStatus(UUID id, UpdateStatusRequest request);
-    Object getStats();
+    StatsResponse getStats();
 }

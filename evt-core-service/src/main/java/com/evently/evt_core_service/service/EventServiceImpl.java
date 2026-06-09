@@ -1,14 +1,15 @@
 package com.evently.evt_core_service.service;
 
-import com.evently.evt_core_service.dto.request.CreateEventRequest;
-import com.evently.evt_core_service.dto.request.UpdateStatusRequest;
-import com.evently.evt_core_service.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.request.CreateEventRequest;
+import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
+import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.response.StatsResponse;
+import com.common.evt_commom_util.enums.Category;
+import com.common.evt_commom_util.enums.Status;
+import com.common.evt_commom_util.exception.BadRequestException;
+import com.common.evt_commom_util.exception.DuplicateResourceException;
+import com.common.evt_commom_util.exception.ResourceNotFoundException;
 import com.evently.evt_core_service.entity.Event;
-import com.evently.evt_core_service.enums.Category;
-import com.evently.evt_core_service.enums.Status;
-import com.evently.evt_core_service.exception.BadRequestException;
-import com.evently.evt_core_service.exception.DuplicateResourceException;
-import com.evently.evt_core_service.exception.ResourceNotFoundException;
 import com.evently.evt_core_service.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,30 +89,38 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Object getStats() {
+    public StatsResponse getStats() {
         long total = eventRepository.count();
+
         var byStatus = new java.util.HashMap<String, Long>();
+        for (Status s : Status.values()) {
+            byStatus.put(s.name(), 0L);
+        }
+        for (Object[] row : eventRepository.countByStatus()) {
+            Status s = (Status) row[0];
+            Long count = (Long) row[1];
+            if (s != null) {
+                byStatus.put(s.name(), count);
+            }
+        }
+
         var byCategory = new java.util.HashMap<String, Long>();
-
-        for (Status status : Status.values()) {
-            long count = eventRepository.findAll(
-                    (root, query, cb) -> cb.equal(root.get("status"), status)
-            ).size();
-            byStatus.put(status.name(), count);
+        for (Category c : Category.values()) {
+            byCategory.put(c.name(), 0L);
+        }
+        for (Object[] row : eventRepository.countByCategory()) {
+            Category c = (Category) row[0];
+            Long count = (Long) row[1];
+            if (c != null) {
+                byCategory.put(c.name(), count);
+            }
         }
 
-        for (Category category : Category.values()) {
-            long count = eventRepository.findAll(
-                    (root, query, cb) -> cb.equal(root.get("category"), category)
-            ).size();
-            byCategory.put(category.name(), count);
-        }
-
-        return new java.util.HashMap<String, Object>() {{
-            put("totalEvents", total);
-            put("byStatus", byStatus);
-            put("byCategory", byCategory);
-        }};
+        return StatsResponse.builder()
+                .totalEvents(total)
+                .byStatus(byStatus)
+                .byCategory(byCategory)
+                .build();
     }
 
     private void validateTransition(Status current, Status next) {

@@ -1,8 +1,8 @@
 package com.evently.evt_bff.client;
 
-import com.evently.evt_bff.exception.BadRequestException;
-import com.evently.evt_bff.exception.DuplicateResourceException;
-import com.evently.evt_bff.exception.ResourceNotFoundException;
+import com.common.evt_commom_util.exception.BadRequestException;
+import com.common.evt_commom_util.exception.DuplicateResourceException;
+import com.common.evt_commom_util.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;

@@ -1,5 +1,6 @@
 package com.evently.evt_notification_service.config;
 
+import com.common.evt_commom_util.constants.CommonConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
@@ -27,9 +28,9 @@ public class KafkaConsumerConfig {
     public CommonErrorHandler errorHandler(KafkaTemplate<Object, Object> kafkaTemplate) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
                 (record, exception) -> {
-                    String dltTopic = "event.published.dlt";
-                    if ("event.status.changed".equals(record.topic())) {
-                        dltTopic = "event.status.changed.dlt";
+                    String dltTopic = CommonConstants.TOPIC_EVENT_PUBLISHED_DLT;
+                    if (CommonConstants.TOPIC_EVENT_STATUS_CHANGED.equals(record.topic())) {
+                        dltTopic = CommonConstants.TOPIC_EVENT_STATUS_CHANGED_DLT;
                     }
                     log.error("Routing failed record in topic {} key {} offset {} to DLT topic {} due to error:",
                             record.topic(), record.key(), record.offset(), dltTopic, exception);

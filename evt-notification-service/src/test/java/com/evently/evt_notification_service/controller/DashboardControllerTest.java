@@ -37,13 +37,14 @@ class DashboardControllerTest {
                 .processed(true)
                 .build();
 
-        when(eventNotificationService.getNotificationsByEntityId("event-1")).thenReturn(List.of(notification));
+        when(eventNotificationService.getNotificationsByEntityId("event-1", 0, 10)).thenReturn(List.of(notification));
 
         mockMvc.perform(get("/v1/notifications").param("entityId", "event-1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].eventId").value("msg-1"))
-                .andExpect(jsonPath("$[0].entityId").value("event-1"))
-                .andExpect(jsonPath("$[0].eventName").value("Salsa Night"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].eventId").value("msg-1"))
+                .andExpect(jsonPath("$.data[0].entityId").value("event-1"))
+                .andExpect(jsonPath("$.data[0].eventName").value("Salsa Night"));
     }
 
     @Test
@@ -59,9 +60,10 @@ class DashboardControllerTest {
 
         mockMvc.perform(get("/v1/dashboard/Dallas"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.city").value("Dallas"))
-                .andExpect(jsonPath("$.totalEvents").value(5))
-                .andExpect(jsonPath("$.publishedEvents").value(2))
-                .andExpect(jsonPath("$.eventsByCategory.MUSIC").value(3));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.city").value("Dallas"))
+                .andExpect(jsonPath("$.data.totalEvents").value(5))
+                .andExpect(jsonPath("$.data.publishedEvents").value(2))
+                .andExpect(jsonPath("$.data.eventsByCategory.MUSIC").value(3));
     }
 }

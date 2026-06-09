@@ -1,14 +1,14 @@
 package com.evently.evt_bff.controller;
 
 import com.evently.evt_bff.client.EventFeignClient;
-import com.evently.evt_bff.dto.request.CreateEventRequest;
-import com.evently.evt_bff.dto.request.UpdateStatusRequest;
-import com.evently.evt_bff.dto.response.ApiResponse;
-import com.evently.evt_bff.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.request.CreateEventRequest;
+import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
+import com.common.evt_commom_util.dto.response.ApiResponse;
+import com.common.evt_commom_util.dto.response.EventResponse;
 import com.evently.evt_bff.dto.response.ListEventsResponse;
-import com.evently.evt_bff.dto.response.StatsResponse;
-import com.evently.evt_bff.enums.Category;
-import com.evently.evt_bff.enums.Status;
+import com.common.evt_commom_util.dto.response.StatsResponse;
+import com.common.evt_commom_util.enums.Category;
+import com.common.evt_commom_util.enums.Status;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

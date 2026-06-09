@@ -1,6 +1,9 @@
 package com.evently.evt_open_service.exception;
 
-import com.evently.evt_open_service.dto.response.ApiResponse;
+import com.common.evt_commom_util.dto.response.ApiResponse;
+import com.common.evt_commom_util.exception.BadRequestException;
+import com.common.evt_commom_util.exception.DuplicateResourceException;
+import com.common.evt_commom_util.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +33,18 @@ public class GlobalExceptionHandler {
     public ApiResponse<Void> handleBadRequest(BadRequestException e) {
         log.error("Bad request: {}", e.getMessage());
         return ApiResponse.failure(e.getMessage());
+    }
+
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Void> handleValidation(org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(org.springframework.validation.FieldError::getDefaultMessage)
+                .findFirst()
+                .orElse("Validation failed");
+        log.error("Validation failed: {}", message);
+        return ApiResponse.failure(message);
     }
 
     @ExceptionHandler(Exception.class)

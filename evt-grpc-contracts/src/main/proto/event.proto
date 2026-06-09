@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package evently;
 
+import "google/protobuf/timestamp.proto";
+
 option java_package = "com.evently.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "EventProto";
@@ -67,8 +69,8 @@ message EventResponse {
   string city = 5;
   CategoryProto category = 6;
   EventStatusProto status = 7;
-  string created_on = 8;
-  string modified_on = 9;
+  google.protobuf.Timestamp created_on = 8;
+  google.protobuf.Timestamp modified_on = 9;
 }
 
 message ListEventsResponse {
