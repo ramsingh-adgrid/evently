@@ -2,7 +2,7 @@ package com.evently.evt_core_service.controller;
 
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -53,7 +53,7 @@ class EventControllerTest {
                 .build();
 
         UUID eventId = UUID.randomUUID();
-        EventResponse response = EventResponse.builder()
+        EventDTO response = EventDTO.builder()
                 .id(eventId)
                 .eventName("Rock Show")
                 .organizerName("Concerts LLC")
@@ -81,7 +81,7 @@ class EventControllerTest {
     void getEvent_shouldReturnEvent() throws Exception {
         // Arrange
         UUID eventId = UUID.randomUUID();
-        EventResponse response = EventResponse.builder()
+        EventDTO response = EventDTO.builder()
                 .id(eventId)
                 .eventName("Rock Show")
                 .city("Dallas")
@@ -103,7 +103,7 @@ class EventControllerTest {
     void listEvents_shouldReturnPaginatedList() throws Exception {
         // Arrange
         UUID eventId = UUID.randomUUID();
-        EventResponse response = EventResponse.builder()
+        EventDTO response = EventDTO.builder()
                 .id(eventId)
                 .eventName("Rock Show")
                 .city("Dallas")
@@ -111,7 +111,7 @@ class EventControllerTest {
                 .status(Status.DRAFT)
                 .build();
 
-        Page<EventResponse> page = new PageImpl<>(List.of(response));
+        Page<EventDTO> page = new PageImpl<>(List.of(response));
 
         when(eventService.listEvents(eq("Dallas"), eq(Category.MUSIC), eq(Status.DRAFT), any(Pageable.class)))
                 .thenReturn(page);
@@ -137,7 +137,7 @@ class EventControllerTest {
                 .status(Status.PUBLISHED)
                 .build();
 
-        EventResponse response = EventResponse.builder()
+        EventDTO response = EventDTO.builder()
                 .id(eventId)
                 .eventName("Rock Show")
                 .city("Dallas")

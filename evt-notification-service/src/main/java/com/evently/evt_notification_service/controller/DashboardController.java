@@ -24,34 +24,14 @@ public class DashboardController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         log.info("Received request to fetch notifications for entityId: {}, page: {}, size: {}", entityId, page, size);
-        List<EventNotificationResponse> dtos = eventNotificationService.getNotificationsByEntityId(entityId, page, size).stream()
-                .map(notification -> EventNotificationResponse.builder()
-                        .id(notification.getId())
-                        .eventId(notification.getEventId())
-                        .entityId(notification.getEntityId())
-                        .eventName(notification.getEventName())
-                        .eventType(notification.getEventType())
-                        .city(notification.getCity())
-                        .category(notification.getCategory())
-                        .status(notification.getStatus())
-                        .receivedAt(notification.getReceivedAt())
-                        .processed(notification.isProcessed())
-                        .build())
-                .toList();
+        List<EventNotificationResponse> dtos = eventNotificationService.getNotificationsByEntityId(entityId, page, size);
         return ApiResponse.success(dtos);
     }
 
     @GetMapping("/dashboard/{city}")
     public ApiResponse<CityDashboardResponse> getDashboard(@PathVariable String city) {
         log.info("Received request to fetch dashboard for city: {}", city);
-        var dashboard = eventNotificationService.getDashboardByCity(city);
-        CityDashboardResponse dto = CityDashboardResponse.builder()
-                .city(dashboard.getCity())
-                .totalEvents(dashboard.getTotalEvents())
-                .publishedEvents(dashboard.getPublishedEvents())
-                .eventsByCategory(dashboard.getEventsByCategory())
-                .lastUpdatedAt(dashboard.getLastUpdatedAt())
-                .build();
-        return ApiResponse.success(dto);
+        CityDashboardResponse response = eventNotificationService.getDashboardByCity(city);
+        return ApiResponse.success(response);
     }
 }

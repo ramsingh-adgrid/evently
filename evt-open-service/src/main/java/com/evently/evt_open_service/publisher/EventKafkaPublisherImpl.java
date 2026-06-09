@@ -1,7 +1,7 @@
 package com.evently.evt_open_service.publisher;
 
 import com.common.evt_commom_util.dto.kafka.KafkaEventWrapper;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.constants.CommonConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,25 +16,17 @@ import java.util.UUID;
 @Slf4j
 public class EventKafkaPublisherImpl implements EventPublisher {
 
-    public static final String TOPIC_EVENT_PUBLISHED = CommonConstants.TOPIC_EVENT_PUBLISHED;
-    public static final String TOPIC_EVENT_STATUS_CHANGED = CommonConstants.TOPIC_EVENT_STATUS_CHANGED;
-
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
-    public void publishEvent(String entityId, String eventType, Object payload) {
+    public void publishEvent(String entityId, String eventType, EventDTO payload) {
         String messageId = UUID.randomUUID().toString();
-
-        EventResponse eventResponsePayload = null;
-        if (payload instanceof EventResponse eventResponse) {
-            eventResponsePayload = eventResponse;
-        }
 
         KafkaEventWrapper wrapper = KafkaEventWrapper.builder()
                 .eventId(messageId)
                 .eventType(eventType)
                 .occurredAt(LocalDateTime.now().toString())
-                .payload(eventResponsePayload)
+                .payload(payload)
                 .build();
 
         String topic = determineTopic(eventType, payload);
@@ -46,10 +38,10 @@ public class EventKafkaPublisherImpl implements EventPublisher {
         kafkaTemplate.send(topic, entityId, wrapper);
     }
 
-    private String determineTopic(String eventType, Object payload) {
+    private String determineTopic(String eventType, EventDTO payload) {
         if (CommonConstants.EVENT_TYPE_CREATED.equals(eventType)) {
-            return TOPIC_EVENT_PUBLISHED;
+            return CommonConstants.TOPIC_EVENT_PUBLISHED;
         }
-        return TOPIC_EVENT_STATUS_CHANGED;
+        return CommonConstants.TOPIC_EVENT_STATUS_CHANGED;
     }
 }

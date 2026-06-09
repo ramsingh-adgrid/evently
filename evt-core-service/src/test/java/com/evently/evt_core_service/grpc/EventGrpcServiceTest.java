@@ -2,7 +2,7 @@ package com.evently.evt_core_service.grpc;
 
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -63,7 +63,7 @@ class EventGrpcServiceTest {
                 .build();
 
         UUID eventId = UUID.randomUUID();
-        EventResponse serviceResponse = EventResponse.builder()
+        EventDTO serviceResponse = EventDTO.builder()
                 .id(eventId)
                 .eventName("Festival")
                 .organizerName("Org")
@@ -121,7 +121,7 @@ class EventGrpcServiceTest {
         UUID eventId = UUID.randomUUID();
         GetEventRequest protoRequest = GetEventRequest.newBuilder().setId(eventId.toString()).build();
 
-        EventResponse serviceResponse = EventResponse.builder()
+        EventDTO serviceResponse = EventDTO.builder()
                 .id(eventId)
                 .eventName("Festival")
                 .organizerName("Org")
@@ -172,7 +172,7 @@ class EventGrpcServiceTest {
                 .build();
 
         UUID eventId = UUID.randomUUID();
-        EventResponse eventResponse = EventResponse.builder()
+        EventDTO eventResponse = EventDTO.builder()
                 .id(eventId)
                 .eventName("Festival")
                 .organizerName("Org")
@@ -182,7 +182,7 @@ class EventGrpcServiceTest {
                 .status(Status.DRAFT)
                 .build();
 
-        Page<EventResponse> page = new PageImpl<>(List.of(eventResponse));
+        Page<EventDTO> page = new PageImpl<>(List.of(eventResponse));
         when(eventService.listEvents(eq("Austin"), eq(Category.MUSIC), eq(Status.DRAFT), any(Pageable.class)))
                 .thenReturn(page);
 
@@ -208,7 +208,7 @@ class EventGrpcServiceTest {
                 .setStatus(EventStatusProto.PUBLISHED)
                 .build();
 
-        EventResponse serviceResponse = EventResponse.builder()
+        EventDTO serviceResponse = EventDTO.builder()
                 .id(eventId)
                 .eventName("Festival")
                 .organizerName("Org")

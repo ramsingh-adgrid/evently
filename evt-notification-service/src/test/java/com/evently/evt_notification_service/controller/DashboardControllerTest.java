@@ -1,7 +1,7 @@
 package com.evently.evt_notification_service.controller;
 
-import com.evently.evt_notification_service.document.CityDashboard;
-import com.evently.evt_notification_service.document.EventNotification;
+import com.evently.evt_notification_service.dto.response.CityDashboardResponse;
+import com.evently.evt_notification_service.dto.response.EventNotificationResponse;
 import com.evently.evt_notification_service.service.EventNotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ class DashboardControllerTest {
 
     @Test
     void getNotifications_shouldReturnNotificationsList() throws Exception {
-        EventNotification notification = EventNotification.builder()
+        EventNotificationResponse notification = EventNotificationResponse.builder()
                 .id("notif-1")
                 .eventId("msg-1")
                 .entityId("event-1")
@@ -49,7 +49,7 @@ class DashboardControllerTest {
 
     @Test
     void getDashboard_shouldReturnCityDashboard() throws Exception {
-        CityDashboard dashboard = CityDashboard.builder()
+        CityDashboardResponse dashboard = CityDashboardResponse.builder()
                 .city("Dallas")
                 .totalEvents(5)
                 .publishedEvents(2)

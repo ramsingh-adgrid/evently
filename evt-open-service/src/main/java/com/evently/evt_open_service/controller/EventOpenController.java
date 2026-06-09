@@ -3,7 +3,7 @@ package com.evently.evt_open_service.controller;
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
 import com.common.evt_commom_util.dto.response.ApiResponse;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -25,12 +25,12 @@ public class EventOpenController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<EventResponse> createEvent(@Valid @RequestBody CreateEventRequest request) {
+    public ApiResponse<EventDTO> createEvent(@Valid @RequestBody CreateEventRequest request) {
         return ApiResponse.success(eventGrpcClientService.createEvent(request));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<EventResponse> getEvent(@PathVariable UUID id) {
+    public ApiResponse<EventDTO> getEvent(@PathVariable UUID id) {
         return ApiResponse.success(eventGrpcClientService.getEvent(id));
     }
 
@@ -45,7 +45,7 @@ public class EventOpenController {
     }
 
     @PatchMapping("/{id}/status")
-    public ApiResponse<EventResponse> updateStatus(
+    public ApiResponse<EventDTO> updateStatus(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateStatusRequest request) {
         return ApiResponse.success(eventGrpcClientService.updateStatus(id, request));

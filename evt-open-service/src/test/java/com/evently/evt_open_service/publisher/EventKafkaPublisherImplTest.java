@@ -2,7 +2,7 @@ package com.evently.evt_open_service.publisher;
 
 import com.common.evt_commom_util.constants.CommonConstants;
 import com.common.evt_commom_util.dto.kafka.KafkaEventWrapper;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class EventKafkaPublisherImplTest {
     void publishEvent_shouldSendToPublishedTopicWhenEventCreated() {
         // Arrange
         String entityId = UUID.randomUUID().toString();
-        EventResponse payload = EventResponse.builder()
+        EventDTO payload = EventDTO.builder()
                 .id(UUID.fromString(entityId))
                 .eventName("Concert")
                 .city("Dallas")
@@ -57,7 +57,7 @@ class EventKafkaPublisherImplTest {
     void publishEvent_shouldSendToStatusChangedTopicWhenEventStatusChanged() {
         // Arrange
         String entityId = UUID.randomUUID().toString();
-        EventResponse payload = EventResponse.builder()
+        EventDTO payload = EventDTO.builder()
                 .id(UUID.fromString(entityId))
                 .eventName("Concert")
                 .city("Dallas")

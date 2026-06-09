@@ -2,10 +2,12 @@ package com.evently.evt_notification_service.service;
 
 import com.evently.evt_notification_service.document.CityDashboard;
 import com.evently.evt_notification_service.document.EventNotification;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.kafka.KafkaEventWrapper;
 import com.evently.evt_notification_service.repository.CityDashboardRepository;
 import com.evently.evt_notification_service.repository.EventNotificationRepository;
+import com.evently.evt_notification_service.dto.response.CityDashboardResponse;
+import com.evently.evt_notification_service.dto.response.EventNotificationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -25,11 +27,18 @@ public class EventNotificationServiceImpl implements EventNotificationService {
     private final EventNotificationRepository eventNotificationRepository;
     private final CityDashboardRepository cityDashboardRepository;
 
+    /**
+     * NOTE: Potential Out-of-Order Delivery Scenario.
+     * Currently, there is no sequence number or versioning on the message envelope.
+     * While Kafka preserves per-entity ordering by using the entityId as the routing key
+     * (ensuring it maps to a single partition), out-of-order delivery can still happen
+     * during partition rebalances, consumer restarts, or DLT replays.
+     */
     @Override
     @Transactional
     public void processEventNotification(KafkaEventWrapper wrapper) {
         String eventId = wrapper.getEventId();
-        EventResponse payload = wrapper.getPayload();
+        EventDTO payload = wrapper.getPayload();
         if (payload == null) {
             log.error("Received message with null payload. Event ID: {}", eventId);
             throw new IllegalArgumentException("Payload cannot be null");
@@ -78,7 +87,7 @@ public class EventNotificationServiceImpl implements EventNotificationService {
 
 
 
-    private void updateDashboard(EventResponse payload) {
+    private void updateDashboard(EventDTO payload) {
         String city = payload.getCity();
         if (city == null || city.isBlank()) {
             log.warn("City is empty for event entity ID: {}. Skipping dashboard update.", payload.getId());
@@ -90,9 +99,7 @@ public class EventNotificationServiceImpl implements EventNotificationService {
 
 
         Optional<EventNotification> previousNotificationOpt = eventNotificationRepository
-                .findByEntityId(payload.getId() != null ? payload.getId().toString() : null).stream()
-                .filter(EventNotification::isProcessed)
-                .max((n1, n2) -> n1.getReceivedAt().compareTo(n2.getReceivedAt()));
+                .findFirstByEntityIdAndProcessedTrueOrderByReceivedAtDesc(payload.getId() != null ? payload.getId().toString() : null);
 
         if (previousNotificationOpt.isEmpty()) {
 //if the event is new   increment the  new count
@@ -221,19 +228,44 @@ public class EventNotificationServiceImpl implements EventNotificationService {
 
 
     @Override
-    public List<EventNotification> getNotificationsByEntityId(String entityId, int page, int size) {
+    public List<EventNotificationResponse> getNotificationsByEntityId(String entityId, int page, int size) {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
                 page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "receivedAt"));
-        return eventNotificationRepository.findByEntityId(entityId, pageable).getContent();
+        return eventNotificationRepository.findByEntityId(entityId, pageable).getContent().stream()
+                .map(this::toNotificationResponse)
+                .toList();
     }
 
-
-
-
     @Override
-    public CityDashboard getDashboardByCity(String city) {
-        return cityDashboardRepository.findById(city)
+    public CityDashboardResponse getDashboardByCity(String city) {
+        CityDashboard dashboard = cityDashboardRepository.findById(city)
                 .orElseThrow(() -> new com.evently.evt_notification_service.exception.ResourceNotFoundException(
                         "No dashboard data found for city: " + city));
+        return toDashboardResponse(dashboard);
+    }
+
+    private EventNotificationResponse toNotificationResponse(EventNotification notification) {
+        return EventNotificationResponse.builder()
+                .id(notification.getId())
+                .eventId(notification.getEventId())
+                .entityId(notification.getEntityId())
+                .eventName(notification.getEventName())
+                .eventType(notification.getEventType())
+                .city(notification.getCity())
+                .category(notification.getCategory())
+                .status(notification.getStatus())
+                .receivedAt(notification.getReceivedAt())
+                .processed(notification.isProcessed())
+                .build();
+    }
+
+    private CityDashboardResponse toDashboardResponse(CityDashboard dashboard) {
+        return CityDashboardResponse.builder()
+                .city(dashboard.getCity())
+                .totalEvents(dashboard.getTotalEvents())
+                .publishedEvents(dashboard.getPublishedEvents())
+                .eventsByCategory(dashboard.getEventsByCategory())
+                .lastUpdatedAt(dashboard.getLastUpdatedAt())
+                .build();
     }
 }

@@ -2,7 +2,7 @@ package com.evently.evt_open_service.service;
 
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -36,12 +36,12 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
     private EventServiceGrpc.EventServiceBlockingStub eventServiceStub;
 
     @Override
-    public EventResponse createEvent(CreateEventRequest request) {
+    public EventDTO createEvent(CreateEventRequest request) {
         com.evently.grpc.CreateEventRequest protoRequest = EventGrpcClientMapper.toProto(request);
 
         try {
             com.evently.grpc.EventResponse protoResponse = eventServiceStub.createEvent(protoRequest);
-            EventResponse response = EventGrpcClientMapper.toDto(protoResponse);
+            EventDTO response = EventGrpcClientMapper.toDto(protoResponse);
             eventPublisher.publishEvent(response.getId().toString(), CommonConstants.EVENT_TYPE_CREATED, response);
             return response;
         } catch (StatusRuntimeException e) {
@@ -50,7 +50,7 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
     }
 
     @Override
-    public EventResponse getEvent(UUID id) {
+    public EventDTO getEvent(UUID id) {
         com.evently.grpc.GetEventRequest protoRequest = com.evently.grpc.GetEventRequest.newBuilder()
                 .setId(id.toString())
                 .build();
@@ -93,12 +93,12 @@ public class EventGrpcClientServiceImpl implements EventGrpcClientService {
     }
 
     @Override
-    public EventResponse updateStatus(UUID id, UpdateStatusRequest request) {
+    public EventDTO updateStatus(UUID id, UpdateStatusRequest request) {
         com.evently.grpc.UpdateEventStatusRequest protoRequest = EventGrpcClientMapper.toProto(id, request);
 
         try {
             com.evently.grpc.EventResponse protoResponse = eventServiceStub.updateEventStatus(protoRequest);
-            EventResponse response = EventGrpcClientMapper.toDto(protoResponse);
+            EventDTO response = EventGrpcClientMapper.toDto(protoResponse);
             eventPublisher.publishEvent(response.getId().toString(), CommonConstants.EVENT_TYPE_STATUS_CHANGED, response);
             return response;
         } catch (StatusRuntimeException e) {

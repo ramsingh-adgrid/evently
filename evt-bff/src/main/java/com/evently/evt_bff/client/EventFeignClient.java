@@ -3,7 +3,7 @@ package com.evently.evt_bff.client;
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
 import com.common.evt_commom_util.dto.response.ApiResponse;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.evently.evt_bff.dto.response.ListEventsResponse;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
@@ -17,10 +17,10 @@ import java.util.UUID;
 public interface EventFeignClient {
 
     @PostMapping("/open/v1/events")
-    ApiResponse<EventResponse> createEvent(@RequestBody CreateEventRequest request);
+    ApiResponse<EventDTO> createEvent(@RequestBody CreateEventRequest request);
 
     @GetMapping("/open/v1/events/{id}")
-    ApiResponse<EventResponse> getEvent(@PathVariable("id") UUID id);
+    ApiResponse<EventDTO> getEvent(@PathVariable("id") UUID id);
 
     @GetMapping("/open/v1/events")
     ApiResponse<ListEventsResponse> listEvents(
@@ -31,7 +31,7 @@ public interface EventFeignClient {
             @RequestParam(value = "size", defaultValue = "10") int size);
 
     @PatchMapping("/open/v1/events/{id}/status")
-    ApiResponse<EventResponse> updateStatus(
+    ApiResponse<EventDTO> updateStatus(
             @PathVariable("id") UUID id,
             @RequestBody UpdateStatusRequest request);
 

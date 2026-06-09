@@ -15,5 +15,5 @@ public interface EventNotificationRepository extends MongoRepository<EventNotifi
     void deleteByEventId(String eventId);
     List<EventNotification> findByEntityId(String entityId);
     Page<EventNotification> findByEntityId(String entityId, Pageable pageable);
-    Optional<EventNotification> findFirstByEntityIdOrderByReceivedAtDesc(String entityId);
+    Optional<EventNotification> findFirstByEntityIdAndProcessedTrueOrderByReceivedAtDesc(String entityId);
 }

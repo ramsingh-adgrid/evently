@@ -1,11 +1,13 @@
 package com.evently.evt_notification_service.service;
 
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.kafka.KafkaEventWrapper;
 import com.evently.evt_notification_service.document.CityDashboard;
 import com.evently.evt_notification_service.document.EventNotification;
 import com.evently.evt_notification_service.repository.CityDashboardRepository;
 import com.evently.evt_notification_service.repository.EventNotificationRepository;
+import com.evently.evt_notification_service.dto.response.CityDashboardResponse;
+import com.evently.evt_notification_service.dto.response.EventNotificationResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,11 +39,11 @@ class EventNotificationServiceImplTest {
     private EventNotificationServiceImpl eventNotificationService;
 
     private KafkaEventWrapper wrapper;
-    private EventResponse payload;
+    private EventDTO payload;
 
     @BeforeEach
     void setUp() {
-        payload = EventResponse.builder()
+        payload = EventDTO.builder()
                 .id(UUID.fromString("00000000-0000-0000-0000-000000000123"))
                 .eventName("Salsa Night")
                 .city("Chicago")
@@ -73,7 +75,7 @@ class EventNotificationServiceImplTest {
     @Test
     void processEventNotification_shouldCreateNewDashboardIfFirstEvent() {
         // Arrange
-        when(eventNotificationRepository.findByEntityId("00000000-0000-0000-0000-000000000123")).thenReturn(new ArrayList<>());
+        when(eventNotificationRepository.findFirstByEntityIdAndProcessedTrueOrderByReceivedAtDesc("00000000-0000-0000-0000-000000000123")).thenReturn(Optional.empty());
         when(cityDashboardRepository.findById("Chicago")).thenReturn(Optional.empty());
 
         // Act
@@ -96,7 +98,7 @@ class EventNotificationServiceImplTest {
     void processEventNotification_shouldIncrementPublishedEventsIfStatusIsPublished() {
         // Arrange
         payload.setStatus(com.common.evt_commom_util.enums.Status.PUBLISHED);
-        when(eventNotificationRepository.findByEntityId("00000000-0000-0000-0000-000000000123")).thenReturn(new ArrayList<>());
+        when(eventNotificationRepository.findFirstByEntityIdAndProcessedTrueOrderByReceivedAtDesc("00000000-0000-0000-0000-000000000123")).thenReturn(Optional.empty());
         when(cityDashboardRepository.findById("Chicago")).thenReturn(Optional.empty());
 
         // Act
@@ -132,7 +134,7 @@ class EventNotificationServiceImplTest {
                 .eventsByCategory(new HashMap<>() {{ put("MUSIC", 1L); }})
                 .build();
 
-        when(eventNotificationRepository.findByEntityId("00000000-0000-0000-0000-000000000123")).thenReturn(List.of(previousNotification));
+        when(eventNotificationRepository.findFirstByEntityIdAndProcessedTrueOrderByReceivedAtDesc("00000000-0000-0000-0000-000000000123")).thenReturn(Optional.of(previousNotification));
         when(cityDashboardRepository.findById("Chicago")).thenReturn(Optional.of(existingDashboard));
 
         // Act
@@ -177,7 +179,7 @@ class EventNotificationServiceImplTest {
                 .eventsByCategory(new HashMap<>())
                 .build();
 
-        when(eventNotificationRepository.findByEntityId("00000000-0000-0000-0000-000000000123")).thenReturn(List.of(previousNotification));
+        when(eventNotificationRepository.findFirstByEntityIdAndProcessedTrueOrderByReceivedAtDesc("00000000-0000-0000-0000-000000000123")).thenReturn(Optional.of(previousNotification));
         when(cityDashboardRepository.findById("Chicago")).thenReturn(Optional.of(chicagoDashboard));
         when(cityDashboardRepository.findById("Detroit")).thenReturn(Optional.of(detroitDashboard));
 
@@ -212,7 +214,7 @@ class EventNotificationServiceImplTest {
                 .thenReturn(pageResult);
 
         // Act
-        List<EventNotification> results = eventNotificationService.getNotificationsByEntityId(entityId, 0, 10);
+        List<EventNotificationResponse> results = eventNotificationService.getNotificationsByEntityId(entityId, 0, 10);
 
         // Assert
         assertThat(results).hasSize(1);
@@ -227,7 +229,7 @@ class EventNotificationServiceImplTest {
         when(cityDashboardRepository.findById(city)).thenReturn(Optional.of(dashboard));
 
         // Act
-        CityDashboard result = eventNotificationService.getDashboardByCity(city);
+        CityDashboardResponse result = eventNotificationService.getDashboardByCity(city);
 
         // Assert
         assertThat(result).isNotNull();
@@ -249,7 +251,7 @@ class EventNotificationServiceImplTest {
     void processEventNotification_shouldCleanUpAndRethrowOnFailure() {
         // Arrange
         String eventId = "msg-999";
-        when(eventNotificationRepository.findByEntityId(any()))
+        when(eventNotificationRepository.findFirstByEntityIdAndProcessedTrueOrderByReceivedAtDesc(any()))
                 .thenThrow(new RuntimeException("Simulated DB failure during updateDashboard"));
 
         // Act & Assert

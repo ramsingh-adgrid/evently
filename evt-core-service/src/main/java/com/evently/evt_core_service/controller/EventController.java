@@ -3,7 +3,7 @@ package com.evently.evt_core_service.controller;
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
 import com.common.evt_commom_util.dto.response.ApiResponse;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -27,18 +27,18 @@ public class EventController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<EventResponse> createEvent(
+    public ApiResponse<EventDTO> createEvent(
             @Valid @RequestBody CreateEventRequest request) {
         return ApiResponse.success(eventService.createEvent(request));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<EventResponse> getEvent(@PathVariable UUID id) {
+    public ApiResponse<EventDTO> getEvent(@PathVariable UUID id) {
         return ApiResponse.success(eventService.getEvent(id));
     }
 
     @GetMapping
-    public ApiResponse<Page<EventResponse>> listEvents(
+    public ApiResponse<Page<EventDTO>> listEvents(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) Category category,
             @RequestParam(required = false) Status status,
@@ -49,7 +49,7 @@ public class EventController {
     }
 
     @PatchMapping("/{id}/status")
-    public ApiResponse<EventResponse> updateStatus(
+    public ApiResponse<EventDTO> updateStatus(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateStatusRequest request) {
         return ApiResponse.success(eventService.updateStatus(id, request));

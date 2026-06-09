@@ -2,7 +2,7 @@ package com.evently.evt_open_service.controller;
 
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -51,7 +51,7 @@ class EventOpenControllerTest {
                 .build();
 
         UUID eventId = UUID.randomUUID();
-        EventResponse response = EventResponse.builder()
+        EventDTO response = EventDTO.builder()
                 .id(eventId)
                 .eventName("Rock Show")
                 .organizerName("Concerts LLC")
@@ -79,7 +79,7 @@ class EventOpenControllerTest {
     void getEvent_shouldReturnEvent() throws Exception {
         // Arrange
         UUID eventId = UUID.randomUUID();
-        EventResponse response = EventResponse.builder()
+        EventDTO response = EventDTO.builder()
                 .id(eventId)
                 .eventName("Rock Show")
                 .city("Dallas")
@@ -101,7 +101,7 @@ class EventOpenControllerTest {
     void listEvents_shouldReturnList() throws Exception {
         // Arrange
         UUID eventId = UUID.randomUUID();
-        EventResponse response = EventResponse.builder()
+        EventDTO response = EventDTO.builder()
                 .id(eventId)
                 .eventName("Rock Show")
                 .city("Dallas")
@@ -140,7 +140,7 @@ class EventOpenControllerTest {
                 .status(Status.PUBLISHED)
                 .build();
 
-        EventResponse response = EventResponse.builder()
+        EventDTO response = EventDTO.builder()
                 .id(eventId)
                 .eventName("Rock Show")
                 .city("Dallas")

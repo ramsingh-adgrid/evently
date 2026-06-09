@@ -2,7 +2,7 @@ package com.evently.evt_open_service.mapper;
 
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.mapper.EventEnumMapper;
 
@@ -28,8 +28,8 @@ public class EventGrpcClientMapper {
                 .build();
     }
 
-    public static EventResponse toDto(com.evently.grpc.EventResponse proto) {
-        return EventResponse.builder()
+    public static EventDTO toDto(com.evently.grpc.EventResponse proto) {
+        return EventDTO.builder()
                 .id(UUID.fromString(proto.getId()))
                 .eventName(proto.getEventName())
                 .organizerName(proto.getOrganizerName())

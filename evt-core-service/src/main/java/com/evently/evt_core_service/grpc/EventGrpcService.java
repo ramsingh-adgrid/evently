@@ -2,7 +2,7 @@ package com.evently.evt_core_service.grpc;
 
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -34,7 +34,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
                             StreamObserver<com.evently.grpc.EventResponse> responseObserver) {
         try {
             CreateEventRequest request = EventGrpcMapper.toDto(protoRequest);
-            EventResponse response = eventService.createEvent(request);
+            EventDTO response = eventService.createEvent(request);
             responseObserver.onNext(EventGrpcMapper.toProto(response));
             responseObserver.onCompleted();
         } catch (DuplicateResourceException e) {
@@ -56,7 +56,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
     public void getEvent(GetEventRequest protoRequest,
                          StreamObserver<com.evently.grpc.EventResponse> responseObserver) {
         try {
-            EventResponse response = eventService.getEvent(UUID.fromString(protoRequest.getId()));
+            EventDTO response = eventService.getEvent(UUID.fromString(protoRequest.getId()));
             responseObserver.onNext(EventGrpcMapper.toProto(response));
             responseObserver.onCompleted();
         } catch (ResourceNotFoundException e) {
@@ -84,7 +84,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
             Status status = protoRequest.getStatus() == EventStatusProto.STATUS_UNSPECIFIED
                     ? null : EventEnumMapper.toStatus(protoRequest.getStatus());
 
-            Page<EventResponse> page = eventService.listEvents(
+            Page<EventDTO> page = eventService.listEvents(
                     city, category, status,
                     PageRequest.of(protoRequest.getPage(), protoRequest.getSize()));
 
@@ -111,7 +111,7 @@ public class EventGrpcService extends EventServiceGrpc.EventServiceImplBase {
                                   StreamObserver<com.evently.grpc.EventResponse> responseObserver) {
         try {
             UpdateStatusRequest request = EventGrpcMapper.toDto(protoRequest);
-            EventResponse response = eventService.updateStatus(UUID.fromString(protoRequest.getId()), request);
+            EventDTO response = eventService.updateStatus(UUID.fromString(protoRequest.getId()), request);
             responseObserver.onNext(EventGrpcMapper.toProto(response));
             responseObserver.onCompleted();
         } catch (ResourceNotFoundException e) {

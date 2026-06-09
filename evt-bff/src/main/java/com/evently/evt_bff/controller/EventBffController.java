@@ -4,7 +4,7 @@ import com.evently.evt_bff.client.EventFeignClient;
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
 import com.common.evt_commom_util.dto.response.ApiResponse;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.evently.evt_bff.dto.response.ListEventsResponse;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
@@ -25,12 +25,12 @@ public class EventBffController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<EventResponse> createEvent(@Valid @RequestBody CreateEventRequest request) {
+    public ApiResponse<EventDTO> createEvent(@Valid @RequestBody CreateEventRequest request) {
         return eventOpenServiceClient.createEvent(request);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<EventResponse> getEvent(@PathVariable UUID id) {
+    public ApiResponse<EventDTO> getEvent(@PathVariable UUID id) {
         return eventOpenServiceClient.getEvent(id);
     }
 
@@ -45,7 +45,7 @@ public class EventBffController {
     }
 
     @PatchMapping("/{id}/status")
-    public ApiResponse<EventResponse> updateStatus(
+    public ApiResponse<EventDTO> updateStatus(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateStatusRequest request) {
         return eventOpenServiceClient.updateStatus(id, request);

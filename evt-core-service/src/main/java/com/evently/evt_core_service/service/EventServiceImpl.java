@@ -2,7 +2,7 @@ package com.evently.evt_core_service.service;
 
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -30,7 +30,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
 
     @Override
-    public EventResponse createEvent(CreateEventRequest request) {
+    public EventDTO createEvent(CreateEventRequest request) {
         if (eventRepository.existsByOrganizerMobile(request.getOrganizerMobile())) {
             throw new DuplicateResourceException(
                     "Organizer mobile already registered: " + request.getOrganizerMobile());
@@ -47,7 +47,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventResponse getEvent(UUID id) {
+    public EventDTO getEvent(UUID id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Event not found: " + id));
@@ -55,8 +55,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<EventResponse> listEvents(String city, Category category,
-                                          Status status, Pageable pageable) {
+    public Page<EventDTO> listEvents(String city, Category category,
+                                           Status status, Pageable pageable) {
         List<Specification<Event>> specs = new ArrayList<>();
 
         if (city != null) {
@@ -77,7 +77,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventResponse updateStatus(UUID id, UpdateStatusRequest request) {
+    public EventDTO updateStatus(UUID id, UpdateStatusRequest request) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Event not found: " + id));
@@ -136,8 +136,8 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private EventResponse toResponse(Event event) {
-        return EventResponse.builder()
+    private EventDTO toResponse(Event event) {
+        return EventDTO.builder()
                 .id(event.getId())
                 .eventName(event.getEventName())
                 .organizerName(event.getOrganizerName())

@@ -2,7 +2,7 @@ package com.evently.evt_core_service.service;
 
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -75,7 +75,7 @@ class EventServiceImplTest {
         when(eventRepository.save(any(Event.class))).thenReturn(event);
 
         // Act
-        EventResponse response = eventService.createEvent(createRequest);
+        EventDTO response = eventService.createEvent(createRequest);
 
         // Assert
         assertThat(response).isNotNull();
@@ -101,7 +101,7 @@ class EventServiceImplTest {
         when(eventRepository.findById(id)).thenReturn(Optional.of(event));
 
         // Act
-        EventResponse response = eventService.getEvent(id);
+        EventDTO response = eventService.getEvent(id);
 
         // Assert
         assertThat(response).isNotNull();
@@ -129,7 +129,7 @@ class EventServiceImplTest {
         when(eventRepository.save(any(Event.class))).thenReturn(event);
 
         // Act
-        EventResponse response = eventService.updateStatus(id, updateRequest);
+        EventDTO response = eventService.updateStatus(id, updateRequest);
 
         // Assert
         assertThat(response).isNotNull();
@@ -157,7 +157,7 @@ class EventServiceImplTest {
         when(eventRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
 
         // Act
-        Page<EventResponse> response = eventService.listEvents("New York", Category.MUSIC, Status.DRAFT, pageable);
+        Page<EventDTO> response = eventService.listEvents("New York", Category.MUSIC, Status.DRAFT, pageable);
 
         // Assert
         assertThat(response).hasSize(1);

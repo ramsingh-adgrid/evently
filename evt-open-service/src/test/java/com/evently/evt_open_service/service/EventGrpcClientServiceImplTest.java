@@ -3,7 +3,7 @@ package com.evently.evt_open_service.service;
 import com.common.evt_commom_util.constants.CommonConstants;
 import com.common.evt_commom_util.dto.request.CreateEventRequest;
 import com.common.evt_commom_util.dto.request.UpdateStatusRequest;
-import com.common.evt_commom_util.dto.response.EventResponse;
+import com.common.evt_commom_util.dto.EventDTO;
 import com.common.evt_commom_util.dto.response.StatsResponse;
 import com.common.evt_commom_util.enums.Category;
 import com.common.evt_commom_util.enums.Status;
@@ -85,13 +85,13 @@ class EventGrpcClientServiceImplTest {
                 .thenReturn(protoResponse);
 
         // Act
-        EventResponse response = eventGrpcClientService.createEvent(createRequest);
+        EventDTO response = eventGrpcClientService.createEvent(createRequest);
 
         // Assert
         assertThat(response).isNotNull();
         assertThat(response.getId()).isEqualTo(eventId);
         assertThat(response.getEventName()).isEqualTo("Indie Concert");
-        verify(eventPublisher).publishEvent(eq(eventId.toString()), eq(CommonConstants.EVENT_TYPE_CREATED), any(EventResponse.class));
+        verify(eventPublisher).publishEvent(eq(eventId.toString()), eq(CommonConstants.EVENT_TYPE_CREATED), any(EventDTO.class));
     }
 
     @Test
@@ -113,7 +113,7 @@ class EventGrpcClientServiceImplTest {
                 .thenReturn(protoResponse);
 
         // Act
-        EventResponse response = eventGrpcClientService.getEvent(eventId);
+        EventDTO response = eventGrpcClientService.getEvent(eventId);
 
         // Assert
         assertThat(response).isNotNull();
@@ -166,12 +166,12 @@ class EventGrpcClientServiceImplTest {
                 .thenReturn(updatedProtoResponse);
 
         // Act
-        EventResponse response = eventGrpcClientService.updateStatus(eventId, updateRequest);
+        EventDTO response = eventGrpcClientService.updateStatus(eventId, updateRequest);
 
         // Assert
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(Status.PUBLISHED);
-        verify(eventPublisher).publishEvent(eq(eventId.toString()), eq(CommonConstants.EVENT_TYPE_STATUS_CHANGED), any(EventResponse.class));
+        verify(eventPublisher).publishEvent(eq(eventId.toString()), eq(CommonConstants.EVENT_TYPE_STATUS_CHANGED), any(EventDTO.class));
     }
 
     @Test
