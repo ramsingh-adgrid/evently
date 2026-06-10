@@ -27,13 +27,7 @@ public class EventNotificationServiceImpl implements EventNotificationService {
     private final EventNotificationRepository eventNotificationRepository;
     private final CityDashboardRepository cityDashboardRepository;
 
-    /**
-     * NOTE: Potential Out-of-Order Delivery Scenario.
-     * Currently, there is no sequence number or versioning on the message envelope.
-     * While Kafka preserves per-entity ordering by using the entityId as the routing key
-     * (ensuring it maps to a single partition), out-of-order delivery can still happen
-     * during partition rebalances, consumer restarts, or DLT replays.
-     */
+
     @Override
     @Transactional
     public void processEventNotification(KafkaEventWrapper wrapper) {
